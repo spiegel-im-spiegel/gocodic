@@ -4,7 +4,7 @@
 
 ## 導入
 
-以下のコマンドで `GOPATH` 上に [gocodic] パッケージを展開されます。
+以下のコマンドで `GOPATH` 上に [gocodic] パッケージが展開されます。
 
 ```
 $ go get -v github.com/spiegel-im-spiegel/gocodic
@@ -23,19 +23,19 @@ $ dep ensure -add github.com/spiegel-im-spiegel/gocodic
 ```go
 opts, err := options.NewOptions("YOUR_ACCESS_TOKEN")
 if err != nil {
-	fmt.Fprintln(os.Stderr, err)
-	return
+    fmt.Fprintln(os.Stderr, err)
+    return
 }
 casing, err := options.NewCasingOption("camel")
 if err != nil {
-	fmt.Fprintln(os.Stderr, err)
-	return
+    fmt.Fprintln(os.Stderr, err)
+    return
 }
 opts.Add(casing)
 style, err := options.NewAcronymStyleOption("camel strict")
 if err != nil {
-	fmt.Fprintln(os.Stderr, err)
-	return
+    fmt.Fprintln(os.Stderr, err)
+    return
 }
 opts.Add(style)
 opts.Add(options.Text("ユーザを登録する"))
@@ -65,8 +65,8 @@ opts.Add(options.Text("ユーザを登録する"))
 ```go
 res, err := gocodic.Translate(opts)
 if err != nil {
-	fmt.Fprintln(os.Stderr, err)
-	return
+    fmt.Fprintln(os.Stderr, err)
+    return
 }
 ```
 
@@ -75,9 +75,9 @@ if err != nil {
 ```go
 //Response class is response data from codic service
 type Response struct {
-	statusCode int
-	status     string
-	body       []byte
+    statusCode int
+    status     string
+    body       []byte
 }
 ```
 
@@ -85,25 +85,25 @@ type Response struct {
 
 ```go
 if res.IsSuccess() {
-	sd, err := response.DecodeSuccessTrans(res.Body())
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return
-	}
-	for _, d := range sd {
-		fmt.Println(d.TranslatedText)
-		//output:
-		//registerUser
-	}
+    sd, err := response.DecodeSuccessTrans(res.Body())
+    if err != nil {
+        fmt.Fprintln(os.Stderr, err)
+        return
+    }
+    for _, d := range sd {
+        fmt.Println(d.TranslatedText)
+        //output:
+        //registerUser
+    }
 } else {
-	ed, err := response.DecodeError(res.Body())
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return
-	}
-	for _, d := range ed.Errors {
-		fmt.Fprintln(os.Stderr, d.Message)
-	}
+    ed, err := response.DecodeError(res.Body())
+    if err != nil {
+        fmt.Fprintln(os.Stderr, err)
+        return
+    }
+    for _, d := range ed.Errors {
+        fmt.Fprintln(os.Stderr, d.Message)
+    }
 }
 ```
 
@@ -163,7 +163,16 @@ casing: camel
 style: camel strict
 ```
 
-[gocodic]: https://github.com/spiegel-im-spiegel/gocodic
+## 参考
+
+- [プログラマーのためのネーミング辞書 | codic](https://codic.jp/)
+    - [API | codic](https://codic.jp/docs/api)
+    - [codic-project/Codic_cli](https://github.com/codic-project/Codic_cli) : [Go 言語]による別実装
+    - [39e/go-codic](https://github.com/39e/go-codic) : [Go 言語]による別実装
+- [【codic】プログラマ必見！もう変数名や関数名に困らない！プログラマのためのネーミングツールを紹介 - プログラミング向上雑記](http://niisi.hatenablog.jp/entry/2016/08/17/171000)
+- [関数や変数のネーミングに悩んだら「codic」に日本語名を入力するとある程度解決するかも](https://nelog.jp/codic)
+
+[gocodic]: https://github.com/spiegel-im-spiegel/gocodic "spiegel-im-spiegel/gocodic: codic の API を利用するための Go 言語パッケージ"
 [codic]: https://codic.jp/ "プログラマーのためのネーミング辞書 | codic"
 [dep]: https://github.com/golang/dep "golang/dep: Go dependency management tool"
 [Go 言語]: https://golang.org/ "The Go Programming Language"
