@@ -1,7 +1,9 @@
 package cmd
 
 import (
-	"os"
+	"bytes"
+	"io"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -12,17 +14,25 @@ import (
 
 // transCmd represents the trans command
 var transCmd = &cobra.Command{
-	Use:   "trans [flags] <word>",
+	Use:   "trans [flags] [<word>...]",
 	Short: "Ttansration API for codic.jp",
 	Long:  "Ttansration API for codic.jp",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
-			return os.ErrInvalid
-		}
 		opts, err := options.NewOptions(viper.GetString("token"))
 		if err != nil {
 			return err
 		}
+
+		if len(args) == 0 {
+			var buf bytes.Buffer
+			io.Copy(&buf, reader)
+			opts.Add(options.Text(string(buf.Bytes())))
+		} else {
+			opts.Add(options.Text(strings.Join(args, "\n")))
+		}
+
+		jsonFlag := viper.GetBool("json")
+
 		pid := viper.GetInt("projectid")
 		if pid > 0 {
 			opts.Add(options.ProjectID(pid))
@@ -35,32 +45,37 @@ var transCmd = &cobra.Command{
 		if err == nil {
 			opts.Add(style)
 		}
-		for _, arg := range args {
-			opts.Add(options.Text(arg))
-		}
 
 		res, err := gocodic.Translate(opts)
 		if err != nil {
 			return err
 		}
 		if !res.IsSuccess() {
+			result = ""
+			resultErr = ""
+			if jsonFlag {
+				resultErr = res.String()
+				return nil
+			}
 			ed, err2 := response.DecodeError(res.Body())
 			if err != nil {
 				return err2
 			}
-			result = ""
-			resultErr = ""
 			for _, d := range ed.Errors {
 				resultErr += d.Message + "\n"
 			}
+			return nil
+		}
+		result = ""
+		resultErr = ""
+		if jsonFlag {
+			result = res.String()
 			return nil
 		}
 		sd, err := response.DecodeSuccessTrans(res.Body())
 		if err != nil {
 			return err
 		}
-		result = ""
-		resultErr = ""
 		for _, d := range sd {
 			result += d.TranslatedText + "\n"
 		}

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"runtime"
 
@@ -35,6 +36,7 @@ func (c ExitCode) Int() int {
 
 var (
 	cfgFile   string
+	reader    io.Reader //input reader (maybe os.Stdin)
 	result    string
 	resultErr string
 )
@@ -56,17 +58,18 @@ func Execute(cui *gocli.UI) (exit ExitCode) {
 		if r := recover(); r != nil {
 			cui.OutputErrln("Panic:", r)
 			for depth := 0; ; depth++ {
-				pc, src, line, ok := runtime.Caller(depth)
+				pc, _, line, ok := runtime.Caller(depth)
 				if !ok {
 					break
 				}
-				cui.OutputErrln(" ->", depth, ":", runtime.FuncForPC(pc).Name(), ":", src, ": line", line)
+				cui.OutputErrln(" ->", depth, ":", runtime.FuncForPC(pc).Name(), ": line", line)
 			}
 			exit = 1
 		}
 	}()
 
 	exit = Normal
+	reader = cui.Reader()
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		exit = Abnormal
@@ -85,7 +88,9 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gocodic.yaml)")
+	rootCmd.PersistentFlags().BoolP("json", "j", false, "output by JSON format (raw data)")
 	rootCmd.PersistentFlags().StringP("token", "t", "", "access token of codic.jp")
+	viper.BindPFlag("json", rootCmd.PersistentFlags().Lookup("json"))
 	viper.BindPFlag("token", rootCmd.PersistentFlags().Lookup("token"))
 }
 
@@ -98,7 +103,7 @@ func initConfig() {
 		// Find home directory.
 		home, err := homedir.Dir()
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 
