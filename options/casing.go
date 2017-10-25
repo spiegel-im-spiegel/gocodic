@@ -1,7 +1,5 @@
 package options
 
-import "github.com/pkg/errors"
-
 //Casing class is "casing" parameter
 type Casing int
 
@@ -29,13 +27,13 @@ var casingMap = map[Casing]string{
 }
 
 //NewCasingOption returns Casing instance
-func NewCasingOption(value string) (Casing, error) {
+func NewCasingOption(value string) (Casing, bool) {
 	for c, v := range casingMap {
 		if v == value {
-			return c, nil
+			return c, true
 		}
 	}
-	return CaseUnknown, errors.Wrap(ErrOption, "error in options.NewCasingOption() function")
+	return CaseUnknown, false
 }
 
 //Key returns key string

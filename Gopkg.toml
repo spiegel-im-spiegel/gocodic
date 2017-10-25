@@ -33,12 +33,12 @@ ignored = [
 
 [[constraint]]
   name = "github.com/spf13/viper"
-  version = "~1.0.0"
+  version = "^1.0.0"
 
 [[constraint]]
   name = "github.com/spiegel-im-spiegel/gocli"
-  version = "~0.4.0"
+  version = "^0.4.0"
 
 [[constraint]]
   name = "github.com/pkg/errors"
-  version = "~0.8.0"
+  version = "^0.8.0"

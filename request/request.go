@@ -1,9 +1,8 @@
 package request
 
 import (
-	"bytes"
+	"io"
 	"io/ioutil"
-	"mime/multipart"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -16,51 +15,28 @@ var (
 )
 
 const (
-	errMsgDo = "error in request.Request.Do() function"
+	errMsgDo   = "error in request.requestDo() function"
+	methodPost = "POST"
+	methodGet  = "GET"
 )
 
-//Request class is parameters for request
-type Request struct {
-	path  string
-	token string
-	data  map[string]string
+//Request interface for Post/Get classes
+type Request interface {
+	Add(string, string)
+	Do() (*response.Response, error)
 }
 
-//New returns Request instance
-func New(path, token string) (*Request, error) {
-	if len(path) == 0 || len(token) == 0 {
-		return nil, ErrRequest
-	}
-	return &Request{path: path, token: token, data: make(map[string]string)}, nil
-}
-
-//Add sets key-value data
-func (r *Request) Add(key, value string) {
-	if r == nil {
-		return
-	}
-	r.data[key] = value
-}
-
-//Do return respons from codic service
-func (r *Request) Do() (*response.Response, error) {
-	if r == nil {
-		return nil, ErrRequest
-	}
-	buffer := new(bytes.Buffer)
-	writer := multipart.NewWriter(buffer)
-	for key, value := range r.data {
-		//fmt.Printf("\"%s\" = \"%s\"\n", key, value)
-		writer.WriteField(key, value)
-	}
-	writer.Close() //flush
-
-	req, err := http.NewRequest("POST", "https://api.codic.jp"+r.path, buffer)
+func requestDo(method, url, token, boundary string, body io.Reader) (*response.Response, error) {
+	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, errors.Wrap(err, errMsgDo)
 	}
-	req.Header.Add("Authorization", "Bearer "+r.token)
-	req.Header.Add("Content-Type", "multipart/form-data; boundary="+writer.Boundary())
+	if len(token) > 0 {
+		req.Header.Add("Authorization", "Bearer "+token)
+	}
+	if len(boundary) > 0 {
+		req.Header.Add("Content-Type", "multipart/form-data; boundary="+boundary)
+	}
 
 	resp, err := new(http.Client).Do(req)
 	if err != nil {
@@ -68,9 +44,9 @@ func (r *Request) Do() (*response.Response, error) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, errors.Wrap(err, errMsgDo)
 	}
-	return response.New(resp.StatusCode, resp.Status, body), nil
+	return response.New(resp.StatusCode, resp.Status, respBody), nil
 }

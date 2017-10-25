@@ -12,7 +12,7 @@ const (
 
 //Translate kick transration API in codic.jp
 func Translate(opts *options.Options) (*response.Response, error) {
-	req, err := request.New(pathTranslate, opts.Token())
+	req, err := request.NewPost(pathTranslate, opts.Token())
 	if err != nil {
 		return nil, err
 	}

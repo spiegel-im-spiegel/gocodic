@@ -14,9 +14,9 @@ import (
 
 const (
 	//Name is applicatin name
-	Name = "gpgpdump"
+	Name = "gocodic"
 	//Version is version for applicatin
-	Version = "v0.2.0dev"
+	Version = "ver. dev"
 )
 
 //ExitCode is OS exit code enumeration class
@@ -43,7 +43,7 @@ var (
 
 // RootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "gocodic [flags] [command]",
+	Use:   Name + " [flags] [command]",
 	Short: "APIs for codic.jp",
 	Long:  "APIs for codic.jp",
 	// Uncomment the following line if your bare application

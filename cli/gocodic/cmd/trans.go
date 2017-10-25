@@ -15,10 +15,10 @@ import (
 // transCmd represents the trans command
 var transCmd = &cobra.Command{
 	Use:   "trans [flags] [<word>...]",
-	Short: "Ttansration API for codic.jp",
-	Long:  "Ttansration API for codic.jp",
+	Short: "Tansration API for codic.jp",
+	Long:  "Tansration API for codic.jp",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		opts, err := options.NewOptions(viper.GetString("token"))
+		opts, err := options.NewOptions(options.CmdTrans, viper.GetString("token"))
 		if err != nil {
 			return err
 		}
@@ -37,12 +37,10 @@ var transCmd = &cobra.Command{
 		if pid > 0 {
 			opts.Add(options.ProjectID(pid))
 		}
-		casing, err := options.NewCasingOption(viper.GetString("casing"))
-		if err == nil {
+		if casing, ok := options.NewCasingOption(viper.GetString("casing")); ok {
 			opts.Add(casing)
 		}
-		style, err := options.NewAcronymStyleOption(viper.GetString("style"))
-		if err == nil {
+		if style, ok := options.NewAcronymStyleOption(viper.GetString("style")); ok {
 			opts.Add(style)
 		}
 

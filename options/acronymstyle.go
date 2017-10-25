@@ -1,7 +1,5 @@
 package options
 
-import "github.com/pkg/errors"
-
 //acronym_style
 
 //AcronymStyle class is "acronym_style" parameter
@@ -28,13 +26,13 @@ var styleMap = map[AcronymStyle]string{
 }
 
 //NewAcronymStyleOption returns Casing instance
-func NewAcronymStyleOption(value string) (AcronymStyle, error) {
+func NewAcronymStyleOption(value string) (AcronymStyle, bool) {
 	for s, v := range styleMap {
 		if v == value {
-			return s, nil
+			return s, true
 		}
 	}
-	return StyleUnknown, errors.Wrap(ErrOption, "error in options.NewAcronymStyleOption() function")
+	return StyleUnknown, false
 }
 
 //Key returns key string

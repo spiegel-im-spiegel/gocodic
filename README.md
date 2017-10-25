@@ -27,23 +27,17 @@ $ dep ensure -add github.com/spiegel-im-spiegel/gocodic
 まず，以下に示すように， `opts *options.Options` を生成して必要な情報をセットします。
 
 ```go
-opts, err := options.NewOptions("YOUR_ACCESS_TOKEN")
+opts, err := options.NewOptions(options.CmdTrans, "YOUR_ACCESS_TOKEN")
 if err != nil {
     fmt.Fprintln(os.Stderr, err)
     return
 }
-casing, err := options.NewCasingOption("camel")
-if err != nil {
-    fmt.Fprintln(os.Stderr, err)
-    return
+if casing, ok := options.NewCasingOption("camel"); ok {
+    opts.Add(casing)
 }
-opts.Add(casing)
-style, err := options.NewAcronymStyleOption("camel strict")
-if err != nil {
-    fmt.Fprintln(os.Stderr, err)
-    return
+if style, ok := options.NewAcronymStyleOption("camel strict"); ok {
+    opts.Add(style)
 }
-opts.Add(style)
 opts.Add(options.Text("ユーザを登録する"))
 ```
 
@@ -122,7 +116,10 @@ Usage:
 
 Available Commands:
   help        Help about any command
-  trans       Ttansration API for codic.jp
+  lookup      Lookup CED API for codic.jp
+  proj        Refer projects API for codic.jp
+  trans       Tansration API for codic.jp
+  version     Print the version number of gocodic
 
 Flags:
       --config string   config file (default is $HOME/.gocodic.yaml)
@@ -133,7 +130,7 @@ Flags:
 Use "gocodic [command] --help" for more information about a command.
 
 $ gocodic trans -h
-Ttansration API for codic.jp
+Tansration API for codic.jp
 
 Usage:
   gocodic trans [flags] [<word>...]
@@ -205,6 +202,10 @@ isRegistered
 ## その他
 
 日本人なので日本語でおｋ。
+
+ブログで若干解説している。
+
+- [Codic API を利用するパッケージを作ってみた — プログラミング言語 Go | text.Baldanders.info](http://text.baldanders.info/golang/codic-api/)
 
 ## 参考
 
