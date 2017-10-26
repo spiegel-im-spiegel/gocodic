@@ -72,7 +72,6 @@ func Execute(cui *gocli.UI) (exit ExitCode) {
 	exit = Normal
 	reader = cui.Reader()
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
 		exit = Abnormal
 		return
 	}
