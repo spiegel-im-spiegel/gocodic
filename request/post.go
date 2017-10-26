@@ -2,6 +2,7 @@ package request
 
 import (
 	"bytes"
+	"io"
 	"mime/multipart"
 
 	"github.com/spiegel-im-spiegel/gocodic/response"
@@ -15,7 +16,7 @@ type Post struct {
 }
 
 //NewPost returns Post instance
-func NewPost(path, token string) (*Post, error) {
+func NewPost(path, token string) (Request, error) {
 	if len(path) == 0 || len(token) == 0 {
 		return nil, ErrRequest
 	}
@@ -35,13 +36,18 @@ func (r *Post) Do() (*response.Response, error) {
 	if r == nil {
 		return nil, ErrRequest
 	}
+	body, boundary := r.makeBody()
+
+	return requestDo(methodPost, "https://api.codic.jp"+r.path, r.token, boundary, body)
+}
+
+func (r *Post) makeBody() (io.Reader, string) {
 	buffer := new(bytes.Buffer)
 	writer := multipart.NewWriter(buffer)
+	defer writer.Close()
 	for key, value := range r.data {
 		//fmt.Printf("\"%s\" = \"%s\"\n", key, value)
 		writer.WriteField(key, value)
 	}
-	writer.Close() //flush
-
-	return requestDo(methodPost, "https://api.codic.jp"+r.path, r.token, writer.Boundary(), buffer)
+	return buffer, writer.Boundary()
 }
