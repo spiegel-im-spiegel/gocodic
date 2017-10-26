@@ -23,11 +23,10 @@ import (
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print the version number of "+Name,
-	Long: "Print the version number of "+Name,
+	Short: "Print the version number of " + Name,
+	Long:  "Print the version number of " + Name,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		resultErr = ""
-		result = fmt.Sprintf("%s %s", Name, Version)
+		fmt.Fprintf(result, "%s %s\n", Name, Version)
 		return nil
 	},
 }

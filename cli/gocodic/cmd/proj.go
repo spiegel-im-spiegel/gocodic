@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -40,10 +41,8 @@ var projCmd = &cobra.Command{
 			return err
 		}
 		if !res.IsSuccess() {
-			result = ""
-			resultErr = ""
 			if jsonFlag {
-				resultErr = res.String()
+				io.Copy(resultErr, res.Body())
 				return nil
 			}
 			ed, err2 := response.DecodeError(res.Body())
@@ -51,29 +50,26 @@ var projCmd = &cobra.Command{
 				return err2
 			}
 			for _, d := range ed.Errors {
-				resultErr += d.Message + "\n"
+				fmt.Fprintln(resultErr, d.Message)
 			}
 			return nil
 		}
-		result = ""
-		resultErr = ""
 		if jsonFlag {
-			result = res.String()
-			return nil
+			io.Copy(result, res.Body())
 		}
 		if opts.Cmd() == options.CmdProj {
 			sd, err := response.DecodeSuccessProject(res.Body())
 			if err != nil {
 				return err
 			}
-			result = fmt.Sprintf("%d:%s, %s (Owner: %d:%s)\n", sd.ID, sd.Name, sd.Description, sd.Owner.ID, sd.Owner.Name)
+			fmt.Fprintf(result, "%d:%s, %s (Owner: %d:%s)\n", sd.ID, sd.Name, sd.Description, sd.Owner.ID, sd.Owner.Name)
 		} else {
 			sd, err := response.DecodeSuccessProjects(res.Body())
 			if err != nil {
 				return err
 			}
 			for _, d := range sd {
-				result += fmt.Sprintf("%d:%s, %s (Owner: %d:%s)\n", d.ID, d.Name, d.Description, d.Owner.ID, d.Owner.Name)
+				fmt.Fprintf(result, "%d:%s, %s (Owner: %d:%s)\n", d.ID, d.Name, d.Description, d.Owner.ID, d.Owner.Name)
 			}
 		}
 		return nil

@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -64,10 +65,8 @@ var lookupCmd = &cobra.Command{
 			return err
 		}
 		if !res.IsSuccess() {
-			result = ""
-			resultErr = ""
 			if jsonFlag {
-				resultErr = res.String()
+				io.Copy(resultErr, res.Body())
 				return nil
 			}
 			ed, err2 := response.DecodeError(res.Body())
@@ -75,14 +74,12 @@ var lookupCmd = &cobra.Command{
 				return err2
 			}
 			for _, d := range ed.Errors {
-				resultErr += d.Message + "\n"
+				fmt.Fprintln(resultErr, d.Message)
 			}
 			return nil
 		}
-		result = ""
-		resultErr = ""
 		if jsonFlag {
-			result = res.String()
+			io.Copy(result, res.Body())
 			return nil
 		}
 		if opts.Cmd() == options.CmdCEDQuery {
@@ -91,14 +88,14 @@ var lookupCmd = &cobra.Command{
 				return err
 			}
 			for _, d := range sd {
-				result += fmt.Sprintf("%d:%s, %s\n", d.ID, d.Title, d.Digest)
+				fmt.Fprintf(result, "%d:%s, %s\n", d.ID, d.Title, d.Digest)
 			}
 		} else {
 			sd, err := response.DecodeSuccessEntry(res.Body())
 			if err != nil {
 				return err
 			}
-			result = fmt.Sprintf("%d:%s, %s\n", sd.ID, sd.Title, sd.Digest)
+			fmt.Fprintf(result, "%d:%s, %s\n", sd.ID, sd.Title, sd.Digest)
 		}
 		return nil
 	},

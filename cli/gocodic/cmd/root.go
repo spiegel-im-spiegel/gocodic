@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -16,7 +17,7 @@ const (
 	//Name is applicatin name
 	Name = "gocodic"
 	//Version is version for applicatin
-	Version = "v0.1.0"
+	Version = "v0.1.1"
 )
 
 //ExitCode is OS exit code enumeration class
@@ -37,8 +38,8 @@ func (c ExitCode) Int() int {
 var (
 	cfgFile   string
 	reader    io.Reader //input reader (maybe os.Stdin)
-	result    string
-	resultErr string
+	result    = new(bytes.Buffer)
+	resultErr = new(bytes.Buffer)
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -75,12 +76,12 @@ func Execute(cui *gocli.UI) (exit ExitCode) {
 		exit = Abnormal
 		return
 	}
-	if len(resultErr) > 0 {
-		cui.OutputErrln(resultErr)
+	if resultErr.Len() > 0 {
+		cui.WriteErrFrom(resultErr)
 		exit = Abnormal
 		return
 	}
-	cui.Outputln(result)
+	cui.WriteFrom(result)
 	return
 }
 
