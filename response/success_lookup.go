@@ -14,9 +14,9 @@ type SuccessLookup struct {
 	Digest string `json:"digest"`
 }
 
-//DecodeSuccessPLookup returns []SuccessLookup instance
-func DecodeSuccessPLookup(r io.Reader) ([]SuccessLookup, error) {
+//DecodeSuccessLookup returns []SuccessLookup instance
+func DecodeSuccessLookup(r io.Reader) ([]SuccessLookup, error) {
 	sucData := make([]SuccessLookup, 0)
 	err := json.NewDecoder(r).Decode(&sucData)
-	return sucData, errors.Wrap(err, "error in response.DecodeSuccessPLookup() function")
+	return sucData, errors.Wrap(err, "error in response.DecodeSuccessLookup() function")
 }

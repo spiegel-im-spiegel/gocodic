@@ -86,7 +86,7 @@ var lookupCmd = &cobra.Command{
 			return nil
 		}
 		if opts.Cmd() == options.CmdCEDQuery {
-			sd, err := response.DecodeSuccessPLookup(res.Body())
+			sd, err := response.DecodeSuccessLookup(res.Body())
 			if err != nil {
 				return err
 			}

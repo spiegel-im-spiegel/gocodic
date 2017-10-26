@@ -15,8 +15,8 @@ import (
 // transCmd represents the trans command
 var transCmd = &cobra.Command{
 	Use:   "trans [flags] [<word>...]",
-	Short: "Tansration API for codic.jp",
-	Long:  "Tansration API for codic.jp",
+	Short: "Transration API for codic.jp",
+	Long:  "Transration API for codic.jp",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		opts, err := options.NewOptions(options.CmdTrans, viper.GetString("token"))
 		if err != nil {
