@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"bytes"
-	"fmt"
-	"io"
 	"os"
 	"runtime"
 
@@ -36,10 +33,9 @@ func (c ExitCode) Int() int {
 }
 
 var (
-	cfgFile   string
-	reader    io.Reader //input reader (maybe os.Stdin)
-	result    = new(bytes.Buffer)
-	resultErr = new(bytes.Buffer)
+	cfgFile string
+	cui     *gocli.UI
+	errFlag = false
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -54,7 +50,7 @@ var rootCmd = &cobra.Command{
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute(cui *gocli.UI) (exit ExitCode) {
+func Execute(ui *gocli.UI) (exit ExitCode) {
 	defer func() {
 		if r := recover(); r != nil {
 			cui.OutputErrln("Panic:", r)
@@ -65,26 +61,27 @@ func Execute(cui *gocli.UI) (exit ExitCode) {
 				}
 				cui.OutputErrln(" ->", depth, ":", runtime.FuncForPC(pc).Name(), ": line", line)
 			}
-			exit = 1
+			exit = Abnormal
 		}
 	}()
 
+	cui = ui
 	exit = Normal
-	reader = cui.Reader()
 	if err := rootCmd.Execute(); err != nil {
 		exit = Abnormal
 		return
 	}
-	if resultErr.Len() > 0 {
-		cui.WriteErrFrom(resultErr)
+	if errFlag {
 		exit = Abnormal
-		return
 	}
-	cui.WriteFrom(result)
 	return
 }
 
 func init() {
+	gocli.NewUI(
+		gocli.Writer(os.Stdout),
+		gocli.ErrorWriter(os.Stderr),
+	)
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gocodic.yaml)")
@@ -103,7 +100,7 @@ func initConfig() {
 		// Find home directory.
 		home, err := homedir.Dir()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			cui.OutputErrln(err)
 			os.Exit(1)
 		}
 

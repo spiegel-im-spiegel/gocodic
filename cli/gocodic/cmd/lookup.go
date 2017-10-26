@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -65,8 +64,9 @@ var lookupCmd = &cobra.Command{
 			return err
 		}
 		if !res.IsSuccess() {
+			errFlag = true
 			if jsonFlag {
-				io.Copy(resultErr, res.Body())
+				cui.WriteErrFrom(res.Body())
 				return nil
 			}
 			ed, err2 := response.DecodeError(res.Body())
@@ -74,12 +74,12 @@ var lookupCmd = &cobra.Command{
 				return err2
 			}
 			for _, d := range ed.Errors {
-				fmt.Fprintln(resultErr, d.Message)
+				cui.OutputErrln(d.Message)
 			}
 			return nil
 		}
 		if jsonFlag {
-			io.Copy(result, res.Body())
+			cui.WriteFrom(res.Body())
 			return nil
 		}
 		if opts.Cmd() == options.CmdCEDQuery {
@@ -88,14 +88,15 @@ var lookupCmd = &cobra.Command{
 				return err
 			}
 			for _, d := range sd {
-				fmt.Fprintf(result, "%d:%s, %s\n", d.ID, d.Title, d.Digest)
+				cui.Outputln(fmt.Sprintf("%d:%s, %s", d.ID, d.Title, d.Digest))
+
 			}
 		} else {
 			sd, err := response.DecodeSuccessEntry(res.Body())
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(result, "%d:%s, %s\n", sd.ID, sd.Title, sd.Digest)
+			cui.Outputln(fmt.Sprintf("%d:%s, %s", sd.ID, sd.Title, sd.Digest))
 		}
 		return nil
 	},

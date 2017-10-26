@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"strings"
 
@@ -26,7 +25,7 @@ var transCmd = &cobra.Command{
 
 		if len(args) == 0 {
 			var buf bytes.Buffer
-			io.Copy(&buf, reader)
+			io.Copy(&buf, cui.Reader())
 			opts.Add(options.Text(string(buf.Bytes())))
 		} else {
 			opts.Add(options.Text(strings.Join(args, "\n")))
@@ -50,8 +49,9 @@ var transCmd = &cobra.Command{
 			return err
 		}
 		if !res.IsSuccess() {
+			errFlag = true
 			if jsonFlag {
-				io.Copy(resultErr, res.Body())
+				cui.WriteErrFrom(res.Body())
 				return nil
 			}
 			ed, err2 := response.DecodeError(res.Body())
@@ -59,12 +59,12 @@ var transCmd = &cobra.Command{
 				return err2
 			}
 			for _, d := range ed.Errors {
-				fmt.Fprintln(resultErr, d.Message)
+				cui.OutputErrln(d.Message)
 			}
 			return nil
 		}
 		if jsonFlag {
-			io.Copy(result, res.Body())
+			cui.WriteFrom(res.Body())
 			return nil
 		}
 		sd, err := response.DecodeSuccessTrans(res.Body())
@@ -72,7 +72,7 @@ var transCmd = &cobra.Command{
 			return err
 		}
 		for _, d := range sd {
-			fmt.Fprintln(result, d.TranslatedText)
+			cui.Outputln(d.TranslatedText)
 		}
 		return nil
 	},

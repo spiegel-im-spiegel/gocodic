@@ -26,7 +26,7 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number of " + Name,
 	Long:  "Print the version number of " + Name,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Fprintf(result, "%s %s\n", Name, Version)
+		cui.OutputErrln(fmt.Sprintf("%s %s", Name, Version))
 		return nil
 	},
 }
