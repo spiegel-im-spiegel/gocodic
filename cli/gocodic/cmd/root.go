@@ -78,7 +78,7 @@ func Execute(ui *gocli.UI) (exit ExitCode) {
 }
 
 func init() {
-	gocli.NewUI(
+	cui = gocli.NewUI(
 		gocli.Writer(os.Stdout),
 		gocli.ErrorWriter(os.Stderr),
 	)
